@@ -14,6 +14,7 @@ This package checks that the Windows OS drive, usually `C:`, is protected with:
 
 | File | Purpose |
 | --- | --- |
+| `DETECTION-RULE.md` | Standalone detection rule with PowerShell detection script and Microsoft Defender Advanced Hunting KQL. |
 | `Detect-BitLockerAes256.ps1` | Intune detection script. It checks whether the device is already compliant. |
 | `Remediate-BitLockerAes256.ps1` | Intune remediation script. It enables or resumes BitLocker when it is safe to do so. |
 | `README.md` | Beginner-friendly setup, flow charts, testing steps, and reporting query. |
