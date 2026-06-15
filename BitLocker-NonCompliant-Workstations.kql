@@ -1,0 +1,57 @@
+let BitLockerAssessments =
+    DeviceTvmSecureConfigurationAssessment
+    | where ConfigurationSubcategory =~ "Bitlocker"
+    | where ConfigurationId in~ ("scid-2090", "scid-2091")
+    | summarize arg_max(Timestamp, *) by DeviceId, ConfigurationId
+    | where IsApplicable == true and IsCompliant == false
+    | project
+        DeviceId,
+        ConfigurationId,
+        AssessmentTimestamp = Timestamp,
+        AssessmentDeviceName = DeviceName,
+        AssessmentOSPlatform = OSPlatform,
+        IsApplicable,
+        IsCompliant,
+        ConfigurationImpact,
+        Context = tostring(Context);
+let BitLockerKnowledge =
+    DeviceTvmSecureConfigurationAssessmentKB
+    | where ConfigurationSubcategory =~ "Bitlocker"
+    | where ConfigurationId in~ ("scid-2090", "scid-2091")
+    | project
+        ConfigurationId,
+        ConfigurationName,
+        ConfigurationDescription,
+        RiskDescription,
+        RemediationOptions,
+        Tags;
+DeviceInfo
+| where ingestion_time() > ago(1d)
+| where OnboardingStatus =~ "Onboarded"
+| where DeviceType =~ "Workstation"
+| where OSPlatform in~ ("Windows10", "Windows11", "Windows 10", "Windows 11")
+| summarize arg_max(Timestamp, *) by DeviceId
+| join kind=inner BitLockerAssessments on DeviceId
+| join kind=leftouter BitLockerKnowledge on ConfigurationId
+| project
+    Timestamp,
+    DeviceId,
+    ReportId,
+    DeviceName,
+    OSPlatform,
+    OSVersion,
+    MachineGroup,
+    DeviceType,
+    PublicIP,
+    Model,
+    Vendor,
+    ConfigurationId,
+    ConfigurationName,
+    ConfigurationDescription,
+    RiskDescription,
+    RemediationOptions,
+    ConfigurationImpact,
+    AssessmentTimestamp,
+    Context,
+    LoggedOnUsers,
+    Tags
